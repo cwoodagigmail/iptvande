@@ -1,0 +1,34 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>IPTV Stream (.m3u8)</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background-color: black;
+    }
+    video {
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+</head>
+<body>
+  <video id="video" autoplay muted controls></video>
+  <script>
+    var video = document.getElementById('video');
+    if (Hls.isSupported()) {
+      var hls = new Hls();
+      hls.loadSource("http://r002-wix4qicoxy.stablenetzone.com:80/live/conwilcon1578/2G7R9178/469345.m3u8");
+      hls.attachMedia(video);
+    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+      video.src = "http://r002-wix4qicoxy.stablenetzone.com:80/live/conwilcon1578/2G7R9178/469345.m3u8";
+    }
+  </script>
+</body>
+</html>
