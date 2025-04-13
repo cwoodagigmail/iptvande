@@ -1,0 +1,111 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>PHX Flight Dashboard</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #000;
+      color: #fff;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      color: #00d8ff;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background: #111;
+    }
+    th, td {
+      padding: 10px;
+      text-align: center;
+      border: 1px solid #333;
+    }
+    th {
+      background-color: #222;
+    }
+    tr:nth-child(even) {
+      background-color: #1a1a1a;
+    }
+  </style>
+</head>
+<body>
+  <h1>PHX Live Flight Status</h1>
+  <table id="flightTable">
+    <thead>
+      <tr>
+        <th>Airline</th>
+        <th>Flight</th>
+        <th>From</th>
+        <th>To</th>
+        <th>Dep Time</th>
+        <th>Arr Time</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    const apiKey = "075daf61-e83e-4de9-9122-e02e10f2bc40";
+    const airlines = ["AM", "WS", "AC"];
+    const airport = "PHX";
+    const endpoint = "https://airlabs.co/api/v9/schedules";
+
+    async function fetchFlights() {
+      let allFlights = [];
+
+      for (const airline of airlines) {
+        for (const dir of ["dep_iata", "arr_iata"]) {
+          const url = new URL(endpoint);
+          url.searchParams.set("api_key", apiKey);
+          url.searchParams.set(dir, airport);
+          url.searchParams.set("airline_iata", airline);
+
+          try {
+            const res = await fetch(url);
+            const data = await res.json();
+            if (data.response) {
+              allFlights.push(...data.response);
+            }
+          } catch (err) {
+            console.error("Error fetching flights:", err);
+          }
+        }
+      }
+
+      renderTable(allFlights);
+    }
+
+    function renderTable(flights) {
+      const tbody = document.querySelector("#flightTable tbody");
+      tbody.innerHTML = "";
+
+      flights.sort((a, b) => new Date(a.dep_time) - new Date(b.dep_time));
+
+      for (const flight of flights) {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${flight.airline_iata || ""}</td>
+          <td>${flight.flight_iata || ""}</td>
+          <td>${flight.dep_iata || ""}</td>
+          <td>${flight.arr_iata || ""}</td>
+          <td>${new Date(flight.dep_time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) || ""}</td>
+          <td>${new Date(flight.arr_time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) || ""}</td>
+          <td>${flight.status || ""}</td>
+        `;
+        tbody.appendChild(row);
+      }
+    }
+
+    fetchFlights();
+    setInterval(fetchFlights, 60000); // refresh every 60 seconds
+  </script>
+</body>
+</html>
